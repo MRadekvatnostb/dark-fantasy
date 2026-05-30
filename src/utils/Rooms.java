@@ -6,10 +6,10 @@ import logic.Enemy;
 
 import java.util.ArrayList;
 public class Rooms { // чертеж для комнат, врагов и боссов
-    private String name;
-    private String desc;
+    private final String name;
+    private final String desc;
     private Enemy boss;
-    private ArrayList<Enemy> enemies = new ArrayList<>(); // список для врагов
+    private final ArrayList<Enemy> enemies = new ArrayList<>(); // список для врагов
 
     public Rooms(String name, String desc) { // имя и описание локации
         this.name = name;

@@ -1,7 +1,5 @@
 package utils;
 
-import logic.Enemy;
-
 import java.util.ArrayList;
 public class Location {
     private final ArrayList<Rooms> locations = new ArrayList<>(); // создаем список с локациями и врагами

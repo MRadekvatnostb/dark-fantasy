@@ -184,9 +184,9 @@ public class DatabaseManager {
                     case "WIZARD": player = new Wizard(); break;
                     case "UNDEATH": player = new Undeath(); break;
                 }
-                player.setId(playerId);
 
                 if (player != null) {
+                    player.setId(playerId);
                     player.setName(rs.getString("name"));
                     player.setHp(rs.getInt("hp"));
                     player.setMinDamage(rs.getInt("min_dmg"));

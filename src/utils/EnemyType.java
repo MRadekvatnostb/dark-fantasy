@@ -19,7 +19,8 @@ public enum EnemyType {
     ROTTING_PLUMBER("Гниющий сантехник", 50, 10, 17, 10, 10, 2, 10, 100),
     DIVER("Водолаз", 85, 12, 14, 45, 2, 0, 8, 100),
     RATMAN("Крысолюд", 70, 10, 20, 10, 10, 10, 15, 100),
-    BOSS_PIRANHA_HANDED_URKA("БОСС: ПИРАНЬЕРУКИЙ УРКА", 200, 30, 40, 15, 30, 5, 15, 200);
+    BOSS_PIRANHA_HANDED_URKA("БОСС: ПИРАНЬЕРУКИЙ УРКА", 200, 30, 40, 15, 30, 5, 15, 200),
+    BOSS_BLIND_PUNISHER("БОСС: СЛЕПОЙ КАРАТЕЛЬ", 500, 5, 50, 8, 20, 5, 5, 500);
     private final String name;
     private final int hp, minDmg, maxDmg, armor, crit, vamp, dodge, maxHp;
     EnemyType(String name, int hp, int minDmg, int maxDmg, int armor,

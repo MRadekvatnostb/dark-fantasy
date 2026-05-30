@@ -33,7 +33,7 @@ public class FinalLocation {
         }
         if (failed) {
             GameUtils.slowPrint("\n\"ТВОЯ ДУША ТЯЖЕЛА, А РАЗУМ ТУМАНЕН! ПРИГОВОР — СМЕРТЬ!\"",25);
-            Enemy boss = new Enemy("БОСС: СЛЕПОЙ КАРАТЕЛЬ", 500, 5, 50, 8, 20, 5,5,500); // создаем босса если ошибся
+            Enemy boss = new Enemy(EnemyFactory.createBoss(EnemyType.BOSS_BLIND_PUNISHER)); // создаем босса если ошибся
             BattleMaster battle = new BattleMaster(player, boss); // создаем арену для игрока и босса
             battle.beginningFight(); // запускаем битву
         } else {

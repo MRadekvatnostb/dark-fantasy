@@ -62,7 +62,10 @@ public class GameEngine {
                     if (!player.isAlive()) break;
                 }
             }
-
+            if (!player.isAlive()) {
+                System.out.println("Игра окончена.");
+                break;
+            }
             if (player.isAlive()) {
                 System.out.println("\n** ВЫ ОДОЛЕЛИ ВСЕХ В " + currentRoom.getName() + " **");
                 player.setHp(this.player.getHp() + 50);

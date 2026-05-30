@@ -1,5 +1,6 @@
 package logic;
 
+import static utils.EffectType.*;
 import engine.StatusEffect;
 import go.Main;
 import utils.EffectType;
@@ -52,17 +53,24 @@ public abstract class Entity {
         System.out.println(">>> " + name + " получил эффект " + type + " (+" + amount + ") на " + duration + " х.");
     }
     public void updateEffects() { // обновление эффекта
-        Iterator<StatusEffect> it = activeEffects.iterator(); // обьявляем итератор для списка эффектов
+        Iterator<StatusEffect> it = activeEffects.iterator(); // объявляем итератор для списка эффектов
         while (it.hasNext()) { // цикл просмотра следующего элемента
             StatusEffect e = it.next(); // взять предмет из списка
-            if (e.getType().equals(EffectType.POISON) || e.getType().equals(EffectType.BLEED)) { // для яда и кровотечения
-                int periodicDmg = Math.abs(e.getAmount()); // только положительные числа берем
-                this.hp -= periodicDmg; // хп минус эти эффекты
 
-                if (this.hp < 0) this.hp = 0; // проверка не ушло ли число в -
+            // Используем switch по Enum вместо громоздкого if с .equals()
+            switch (e.getType()) {
+                case POISON, BLEED -> { // для яда и кровотечения
+                    int periodicDmg = Math.abs(e.getAmount()); // только положительные числа берем
+                    this.hp -= periodicDmg; // хп минус эти эффекты
 
-                System.out.println("(!) " + name + " страдает от " + e.getType() + ": -" + periodicDmg + " HP");
+                    if (this.hp < 0) this.hp = 0; // проверка не ушло ли число в -
+
+                    System.out.println("(!) " + name + " страдает от " + e.getType() + ": -" + periodicDmg + " HP");
+                }
+                // Если будут другие эффекты (например, DMG), они просто пройдут мимо этой логики урона
+                default -> {}
             }
+
             e.tick(); // длительность эффекта уменьшается на ход
             if (e.isExpired()) { // если эффект закончился
                 System.out.println(">>> Эффект " + e.getType() + " у " + name + " закончился.");
@@ -73,7 +81,7 @@ public abstract class Entity {
     private int getBonusFor(EffectType type) { // получение бонуса
         int sum = 0;
         for (StatusEffect e : activeEffects) { // если эффект есть, то он дает свой эффект
-            if (e.getType().equals(type)) sum += e.getAmount(); // тип эффекта получает сумму и прибавляет длину
+            if (e.getType() == type) sum += e.getAmount(); // тип эффекта получает сумму и прибавляет длину
         }
         return sum;
     }

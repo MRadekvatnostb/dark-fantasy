@@ -6,7 +6,7 @@ import heroes.*;
 import logic.Player;
 import utils.GameUtils;
 
-public class Menu {
+class Menu {
     public static void menu() {
         Player player = null; // игрок изначально ничего
         System.out.println("=== ТЕНЬ БЕЗДНЫ ===");
