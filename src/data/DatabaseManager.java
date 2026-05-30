@@ -1,4 +1,6 @@
 package data;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 import java.io.InputStream;
 import heroes.*;
@@ -11,38 +13,25 @@ import java.util.ArrayList;
 
 public class DatabaseManager {
     // Данные для подключения (проверь пароль!)
-        private static String DB_URL;
-        private static String DB_USER;
-        private static String DB_PASSWORD;
+    private static String url;
+    private static String user;
+    private static String password;
 
     static {
-        try (InputStream input = DatabaseManager.class.getClassLoader()
-                .getResourceAsStream("application.properties")) {
-
-            if (input == null) {
-                throw new RuntimeException("Файл application.properties не найден!");
-            }
-
-            Properties prop = new Properties();
-            prop.load(input);
-
-            DB_URL = prop.getProperty("db.url");
-            DB_USER = prop.getProperty("db.user");
-            DB_PASSWORD = prop.getProperty("db.password");
-
-            System.out.println("✅ Конфигурация БД успешно загружена из application.properties");
-        } catch (Exception e) {
-            System.out.println("❌ Ошибка загрузки application.properties: " + e.getMessage());
-            // Fallback
-            DB_URL = "jdbc:postgresql://localhost:5432/Dark_Base";
-            DB_USER = "postgres";
-            DB_PASSWORD = "1337";
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            props.load(fis);
+            url = props.getProperty("db.url");
+            user = props.getProperty("db.user");
+            password = props.getProperty("db.password");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-        public static Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        }
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
+    }
     public static void createTableIfNotExists() {
         String sqlPlayer = "CREATE TABLE IF NOT EXISTS players (" +
                 "id SERIAL PRIMARY KEY, " +

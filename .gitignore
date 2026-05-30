@@ -44,3 +44,4 @@ src/resources/application.properties
 
 # Логи
 *.log
+config.properties
