@@ -130,7 +130,7 @@ public class DatabaseManager {
                 pstmt.setInt(14, player.getId());
                 pstmt.executeUpdate();
                 // Шмотки тоже обновляем (удаляем старые и пишем новые)
-                saveInventory(player.getId(), player.getInventory());
+                saveInventory(player.getId(), player.showInventory(), Integer);
             } else {
                 // Для INSERT получаем новый ID
                 try (ResultSet rs = pstmt.executeQuery()) {

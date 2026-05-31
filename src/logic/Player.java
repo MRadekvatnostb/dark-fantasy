@@ -3,12 +3,14 @@ package logic;
 import utils.EffectType;
 import utils.GameItem;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public abstract class Player extends Entity {
     private int id;
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-    private ArrayList<GameItem> inventory = new ArrayList<>(); // список предметов в инвентаре
+    private final Map<String, Integer> inventory = new LinkedHashMap<>(); // список предметов в инвентаре
     protected int energy = 0; // энергия
     protected final int MAX_ENERGY = 100; // максимальная энергия
     public Player(String name, int hp, int minDamage, int maxDamage, int armor, int critChance, int vampirism, int dodge, int maxHp) {
@@ -17,6 +19,8 @@ public abstract class Player extends Entity {
     public void gainEnergy(int amount) { // добавление энергии
         this.energy = Math.min(this.energy + amount, MAX_ENERGY); // выбираем минимальное число
     }
+
+
 
     public int getEnergy() {return energy;} // возвращаем энергию
     public void setEnergy(int energy) {this.energy = energy; } // тут можно изменять энергию
@@ -88,11 +92,34 @@ public abstract class Player extends Entity {
 
     public abstract void useUltimate(Entity target); // использование ульты
     public abstract void superAttack(Entity target); // супер атака
-    public void addItem(GameItem gameItem) { // добавляем предмет
-        this.inventory.add(gameItem);
-        System.out.println("В инвентарь добавлено: " + gameItem.getName());
+     public void addItem(GameItem item) {
+        String name = item.getName();
+        inventory.merge(name,1,Integer::sum);
+         System.out.println("Добавлено: " + name);
+}
+public boolean useItem(String itemName) {
+         Integer count = inventory.get(itemName);
+         if (count == null || count<=0){
+             System.out.println("Такого предмета нет! ");
+             return false;
+         }
+         inventory.put(itemName, count-1);
+         if (inventory.get(itemName) <= 0) {
+             inventory.remove(itemName);
+
+         }
+    System.out.println("Использовано: " + itemName);
+         return true;
+}
+
+    public void showInventory() {
+        System.out.println("=== ТВОЙ ИНВЕНТАРЬ ===");
+        for(Map.Entry < String, Integer > entry:inventory.entrySet()) {
+            System.out.println(entry.getKey() + " X " + entry.getValue());
+        }
     }
-    public ArrayList<GameItem> getInventory() { // делаем инвентарь публичным
+
+    public Map<String, Integer> getInventory() { // делаем инвентарь публичным
         return inventory;
     }
 }
