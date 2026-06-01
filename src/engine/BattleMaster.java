@@ -9,6 +9,8 @@ import utils.GameItem;
 import utils.GameUtils;
 
 import java.util.ArrayList;
+import java.util.Map;
+
 public class BattleMaster {
     private Player player;
     private Enemy enemy;
@@ -126,9 +128,11 @@ public class BattleMaster {
     public boolean inventoryMove() {
         GameUtils.drawLine(20,10);
         System.out.println("Ваш инвентарь: ");
-        ArrayList<GameItem> inv = player.getInventory();
-        ArrayList<GameItem> consumables = new ArrayList<>();
-        return managerInventory(inv, consumables);
+        Map<String, Integer> inv = player.getInventory();
+        if (inv.isEmpty()) {
+            System.out.println("Инвентарь пуст...");
+            return false;
+        }
     }
     public boolean ultaMove() {
         if (player.getEnergy() >= maxEnergy) { // если энергии 100, то можно использовать ульту
@@ -189,7 +193,7 @@ public class BattleMaster {
                     turnMade = attackMove();
                     break;
                 case 2:
-                    turnMade = inventoryMove();
+                    turnMade = useItemFromInventory();
                     break;
                 case 3:
                     turnMade = ultaMove();

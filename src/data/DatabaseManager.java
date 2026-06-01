@@ -1,6 +1,7 @@
 package data;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 import java.io.InputStream;
 import heroes.*;
@@ -68,25 +69,27 @@ public class DatabaseManager {
         }
     }
 
-    private static void saveInventory(int playerId, ArrayList<GameItem> inventory) {
+    private static void saveInventory(int playerId, Map<String, Integer> inventory) {
         // Чтобы не дублировать шмотки при каждом сохранении, сначала чистим старый рюкзак этого игрока
         String deleteSql = "DELETE FROM inventory WHERE player_id = ?";
-        String insertSql = "INSERT INTO inventory (player_id, item_name) VALUES (?, ?)";
+        String insertSql = "INSERT INTO inventory (player_id, item_name, quantity) VALUES (?, ?, ?)";
 
         try (Connection conn = getConnection()) {
             // Чистим
-            try (PreparedStatement delPstmt = conn.prepareStatement(deleteSql)) {
-                delPstmt.setInt(1, playerId);
-                delPstmt.executeUpdate();
+            try (PreparedStatement del = conn.prepareStatement(deleteSql)) {
+                del.setInt(1, playerId);
+                del.executeUpdate();
             }
             // Записываем текущие шмотки
-            try (PreparedStatement insPstmt = conn.prepareStatement(insertSql)) {
-                for (GameItem item : inventory) {
-                    insPstmt.setInt(1, playerId);
-                    insPstmt.setString(2, item.getName());
-                    insPstmt.executeUpdate();
+            try (PreparedStatement ins = conn.prepareStatement(insertSql)) {
+                for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
+                    ins.setInt(1, playerId);
+                    ins.setString(2, entry.getKey());
+                    ins.setInt(3, entry.getValue());
+                    ins.executeUpdate();
                 }
             }
+            System.out.println("Инвентарь игрока сохранён.");
         } catch (SQLException e) {
             System.out.println("Ошибка сохранения рюкзака: " + e.getMessage());
         }
@@ -130,7 +133,7 @@ public class DatabaseManager {
                 pstmt.setInt(14, player.getId());
                 pstmt.executeUpdate();
                 // Шмотки тоже обновляем (удаляем старые и пишем новые)
-                saveInventory(player.getId(), player.showInventory(), Integer);
+                saveInventory(player.getId(), player.getInventory());
             } else {
                 // Для INSERT получаем новый ID
                 try (ResultSet rs = pstmt.executeQuery()) {

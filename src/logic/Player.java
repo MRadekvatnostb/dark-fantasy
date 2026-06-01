@@ -3,6 +3,7 @@ package logic;
 import utils.EffectType;
 import utils.GameItem;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -111,15 +112,7 @@ public boolean useItem(String itemName) {
     System.out.println("Использовано: " + itemName);
          return true;
 }
-
-    public void showInventory() {
-        System.out.println("=== ТВОЙ ИНВЕНТАРЬ ===");
-        for(Map.Entry < String, Integer > entry:inventory.entrySet()) {
-            System.out.println(entry.getKey() + " X " + entry.getValue());
-        }
-    }
-
-    public Map<String, Integer> getInventory() { // делаем инвентарь публичным
-        return inventory;
+    public Map<String, Integer> getInventory() {
+        return Collections.unmodifiableMap(inventory);
     }
 }
