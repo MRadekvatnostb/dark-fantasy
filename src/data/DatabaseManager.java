@@ -54,7 +54,8 @@ public class DatabaseManager {
         String sqlInventory = "CREATE TABLE IF NOT EXISTS inventory (" +
                 "id SERIAL PRIMARY KEY, " +
                 "player_id INTEGER REFERENCES players(id) ON DELETE CASCADE, " +
-                "item_name VARCHAR(100) NOT NULL)";
+                "item_name VARCHAR(100) NOT NULL, " +
+                "quantity INTEGER DEFAULT 1 NOT NULL)";
 
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
@@ -159,8 +160,13 @@ public class DatabaseManager {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("item_name");
-                // Тебе нужен метод в utils.ListItem, который создает предмет по имени!
-                player.addItem(ListItem.createItemByName(name));
+                int quantity = rs.getInt("quantity");
+                GameItem item = ListItem.createItemByName(name);
+                if (item != null) {
+                    for (int i = 0; i < quantity; i++) {
+                        player.addItem(item);
+                    }
+                }
             }
         } catch (SQLException e) { System.out.println("Ошибка инвентаря: " + e.getMessage()); }
     }

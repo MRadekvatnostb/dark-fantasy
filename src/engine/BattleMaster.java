@@ -7,6 +7,7 @@ import logic.Player;
 import utils.EffectType;
 import utils.GameItem;
 import utils.GameUtils;
+import utils.ListItem;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -54,86 +55,6 @@ public class BattleMaster {
         }
         return true; // ход сделан
     }
-
-    public boolean inventoryChekEmpty(ArrayList<GameItem> inv, ArrayList<GameItem> consumables) {
-        for (GameItem item : inv) {
-            if (item.getHealBuff() > 0 || item.getDuration() > 0) {
-                consumables.add(item);
-            }
-        }
-        if (consumables.isEmpty()) {
-            System.out.println("Никакой еды или зелий... Придется биться на сухую.");
-            return false;
-        } else {
-            for (int i = 0; i < consumables.size(); i++) {
-                GameItem item = consumables.get(i);
-                String stats = (item.getHealBuff() > 0 ? " +" + item.getHealBuff() + "HP" : "") +
-                        (item.getDuration() > 0 ? " [Бафф на " + item.getDuration() + "х]" : "");
-                System.out.println(i + ". " + item.getName() + stats);
-            }
-            return true;
-        }
-    }
-
-    public void instHeal(GameItem itemToUse) {
-        if (itemToUse.getHealBuff() > 0) {
-            int oldHp = player.getHp();
-            player.setHp(Math.min(player.getHp() + itemToUse.getHealBuff(), player.getMaxHp()));
-            System.out.println(">> Восстановлено " + (player.getHp() - oldHp) + " HP");
-        }
-    }
-
-    public void addTimeEffect(GameItem itemToUse) {
-        int dur = itemToUse.getDuration();
-        if (dur > 0) {
-            if (itemToUse.getDmgBuff() > 0) player.addEffect(EffectType.DMG, itemToUse.getDmgBuff(), dur);
-            if (itemToUse.getArmorBuff() > 0) player.addEffect(EffectType.ARMOR, itemToUse.getArmorBuff(), dur);
-            if (itemToUse.getCritChanceBuff() > 0) player.addEffect(EffectType.CRIT, itemToUse.getCritChanceBuff(), dur);
-            if (itemToUse.getDodgeBuff() > 0) player.addEffect(EffectType.DODGE, itemToUse.getDodgeBuff(), dur);
-            if (itemToUse.getStunBuff() > 0) player.addEffect(EffectType.STUN, itemToUse.getStunBuff(), dur);
-        }
-    }
-
-    public boolean managerInventory(ArrayList<GameItem> inv, ArrayList<GameItem> consumables) {
-        if (!inventoryChekEmpty(inv, consumables)) {
-            return false;
-        }
-
-        System.out.println("Выбери номер предмета или 99 для отмены:");
-        if (Main.cs.hasNextInt()) {
-            int choiceIdx = Main.cs.nextInt();
-            if (choiceIdx == 99) {
-                return false; // Нажал отмену — ход не тратится
-            }
-
-            if (choiceIdx < consumables.size() && choiceIdx >= 0 ) {
-                GameItem itemToUse = consumables.get(choiceIdx);
-
-                instHeal(itemToUse);
-                addTimeEffect(itemToUse);
-
-                System.out.println("Вы использовали: " + itemToUse.getName());
-                inv.remove(itemToUse); // Удаляем из основного инвентаря игрока
-                return true; // Предмет успешно использован, ход сделан!
-            } else {
-                System.out.println("Нет такого номера предмета!");
-                return false;
-            }
-        } else {
-            Main.cs.next(); // чистим мусор из сканера
-            return false;
-        }
-    }
-
-    public boolean inventoryMove() {
-        GameUtils.drawLine(20,10);
-        System.out.println("Ваш инвентарь: ");
-        Map<String, Integer> inv = player.getInventory();
-        if (inv.isEmpty()) {
-            System.out.println("Инвентарь пуст...");
-            return false;
-        }
-    }
     public boolean ultaMove() {
         if (player.getEnergy() >= maxEnergy) { // если энергии 100, то можно использовать ульту
             GameUtils.drawLine(20, 10);
@@ -165,7 +86,57 @@ public class BattleMaster {
 
         }
     }
+    private boolean useItemFromInventory() {
+        GameUtils.drawLine(20, 10);
+        System.out.println("Ваш инвентарь: ");
+        Map<String, Integer> inventory = player.getInventory();
+        if (inventory.isEmpty()) {
+            System.out.println("Инвентарь пуст..");
+            return false;
+        }
+        int index = 0;
+        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
+            String name = entry.getKey();
+            int quantity = entry.getValue();
+            GameItem item = ListItem.createItemByName(name);
 
+            String stats = "";
+            if (item != null) {
+                if (item.getDuration() > 0) stats += " [Бафф " + item.getDuration() + "x";
+                if (item.getHealBuff() > 0) stats += " +" + item.getHealBuff() + "HP";
+            }
+            System.out.printf("%d. %s x%d%s\n", index++, name, quantity, stats);
+        }
+        System.out.println("Выбери номер предмета или 99 для отмены: ");
+        if (Main.cs.hasNextInt()) {
+            int choiceIdx = Main.cs.nextInt();
+            if (choiceIdx == 99) return  false;
+            if (choiceIdx >= 0 && choiceIdx < inventory.size()) {
+                String itemName = new ArrayList<>(inventory.keySet()).get(choiceIdx);
+                GameItem item = ListItem.createItemByName(itemName);
+                if (player.useItem(itemName)) {
+                    if (item.getHealBuff() > 0) {
+                        int oldHp = player.getHp();
+                        player.setHp(Math.min(player.getHp() + item.getHealBuff(), player.getMaxHp()));
+                        System.out.println(">> Восстановлено: " + (player.getHp() - oldHp) + " HP");
+                    }
+                    int duration = item.getDuration();
+                    if (duration > 0) {
+                        if (item.getDmgBuff() > 0) player.addEffect(EffectType.DMG, item.getDmgBuff(), duration);
+                        if (item.getArmorBuff() > 0) player.addEffect(EffectType.ARMOR, item.getArmorBuff(), duration);
+                        if (item.getCritChanceBuff() > 0) player.addEffect(EffectType.CRIT, item.getCritChanceBuff(), duration);
+                        if (item.getDodgeBuff() > 0) player.addEffect(EffectType.DODGE, item.getDodgeBuff(), duration);
+                        if (item.getStunBuff() > 0) player.addEffect(EffectType.STUN, item.getStunBuff(), duration);
+                    }
+                    System.out.println("Вы использовали: " + itemName);
+                    return true;
+                }
+            }
+        } else {
+            Main.cs.next();
+        }
+        return false;
+    }
     public boolean playerTurn() { // ход игрока
         boolean turnMade = false; // проверка совершение хода
 

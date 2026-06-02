@@ -2,6 +2,7 @@ package logic;
 
 import utils.EffectType;
 import utils.GameItem;
+import utils.ListItem;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -26,23 +27,27 @@ public abstract class Player extends Entity {
     public int getEnergy() {return energy;} // возвращаем энергию
     public void setEnergy(int energy) {this.energy = energy; } // тут можно изменять энергию
     private int getInventoryBonus(EffectType statType) {
-        return getInventory().stream()
-                .filter(item -> item.getDuration() == 0)
-                .mapToInt(item -> {
-                    switch (statType) {
-                        case DMG: return item.getDmgBuff();
-                        case STUN: return item.getStunBuff();
-                        case RES: return item.getResurrectionBuff();
-                        case DUBATK: return item.getDoubleAttackBuff();
-                        case MONEY: return item.getMoneyBuff();
-                        case ARMOR: return item.getArmorBuff();
-                        case DODGE: return item.getDodgeBuff();
-                        case CRIT: return item.getCritChanceBuff();
-                        case VAMP: return item.getStillHpBuff();
-                        case HP: return item.getHealBuff();
-                        default: return 0;
-                    }
-                }).sum();
+        int sum = 0;
+        for(Map.Entry<String, Integer> entry : inventory.entrySet()) {
+            String itemName = entry.getKey();
+            GameItem item = ListItem.createItemByName(itemName); // создаем предмет по имени
+            if (item == null)  continue;
+            if (item.getDuration() != 0) continue;
+            sum += switch (statType) {
+                    case DMG -> item.getDmgBuff();
+                    case STUN -> item.getStunBuff();
+                    case RES -> item.getResurrectionBuff();
+                    case DUBATK -> item.getDoubleAttackBuff();
+                    case MONEY -> item.getMoneyBuff();
+                    case ARMOR -> item.getArmorBuff();
+                    case DODGE -> item.getDodgeBuff();
+                    case CRIT -> item.getCritChanceBuff();
+                    case VAMP -> item.getStillHpBuff();
+                    case HP -> item.getHealBuff();
+                    default -> 0;
+            };
+        }
+        return sum;
     }
     @Override
     public int getMinDamage() {
